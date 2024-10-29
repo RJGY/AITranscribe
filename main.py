@@ -11,6 +11,7 @@ def main():
     model = whisper.load_model("base")
     ai = genai.GenerativeModel("gemini-1.5-flash")
     folders = [os.getenv("FOLDER_TO_SCAN"), os.getenv("FOLDER_TO_SCAN_2")]
+    print(folders)
     while True:
         for folder in folders:
             files = scan_folder(folder)
