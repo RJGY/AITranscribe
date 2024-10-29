@@ -38,7 +38,7 @@ def main():
     
     
 def scan_folder(folder_to_scan: str) -> list[str]:
-    print("scanning folder")
+    print("scanning folder " + folder_to_scan)
     files = [os.path.join(folder_to_scan, f) for f in os.listdir(folder_to_scan)]
     return files
 
