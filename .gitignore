@@ -164,5 +164,6 @@ cython_debug/
 .mp3
 audio_files/
 scanned_files/
-text_output/
+transcripts/
 .aider*
+input/
