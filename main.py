@@ -8,13 +8,23 @@ from datetime import datetime
 # Third-party imports
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 import whisper
 
 load_dotenv()
 
-# Modify the FastAPI app initialization
+# Add this after creating the FastAPI app
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Load Whisper model (choose "base", "small", "medium", or "large" for accuracy)
 model = whisper.load_model("base")
