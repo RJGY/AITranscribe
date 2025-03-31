@@ -87,38 +87,38 @@ def transcribe(file: UploadFile = File(...)) -> str:
     temp_path = f"temp_{timestamp}_{file.filename}"
     output_md = f"{os.path.splitext(file.filename)[0]}_{timestamp}_transcript.md"
     
-    
     with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    # Create audio directory if it doesn't exist
+    audio_dir = os.environ.get("AUDIO_DIR", "processed_audio")
+    os.makedirs(audio_dir, exist_ok=True)
+
     if not temp_path.endswith('.mp3'):
-        output_file = os.path.splitext(temp_path)[0] + ".mp3"
+        output_file = os.path.join(audio_dir, f"{os.path.splitext(file.filename)[0]}_{timestamp}.mp3")
         subprocess.run(['ffmpeg', '-i', temp_path, output_file],
                     stdout=subprocess.DEVNULL, 
                     stderr=subprocess.PIPE,
                     check=True)
+        # Remove only the temporary file
+        try:
+            os.remove(temp_path)
+        except FileNotFoundError:
+            pass
+    else:
+        # If it's already an MP3, just move it to the audio directory
+        output_file = os.path.join(audio_dir, f"{file.filename}_{timestamp}.mp3")
+        shutil.move(temp_path, output_file)
 
     # Transcribe audio
     result = model.transcribe(output_file)
-
-    try:
-        os.remove(temp_path)
-    except FileNotFoundError:
-        pass
-        
-    try:
-        os.remove(output_file)
-    except FileNotFoundError:
-        pass
-
-    # Get transcription text
     transcription = result["text"]
 
     # Generate summary
     summary = summarize_text(transcription)
 
     # Create output directory if it doesn't exist
-    output_dir = os.environ['TRANSCRIPT_DIR']  # Default to 'transcripts' if not set
+    output_dir = os.environ.get("TRANSCRIPT_DIR", "transcripts")  # Default to 'transcripts' if not set
     os.makedirs(output_dir, exist_ok=True)
     
     # Save to markdown file in the specified directory
