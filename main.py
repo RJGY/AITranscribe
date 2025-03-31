@@ -24,7 +24,7 @@ genai.configure(api_key=os.environ['GENERATIVEAI_API_KEY'])
 
 # Tasks
 async def background_task():
-    scan_dir = os.environ['SCAN_DIR']  # Get from env or default to 'input'
+    scan_dir = os.environ.get("SCAN_DIR", "input")  # Get from env or default to 'input'
     # Create directory if it doesn't exist
     os.makedirs(scan_dir, exist_ok=True)
 
