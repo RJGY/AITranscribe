@@ -86,7 +86,7 @@ async def startup_event():
 # Service
 def summarize_text(text) -> str:
     """Summarizes the given text using Google's Gemini AI."""
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash")
     response = model.generate_content(f"Summarize the following text:\n\n{text}")
     return response.text if response.text else "Summary unavailable."
 
@@ -134,24 +134,25 @@ def transcribe(file: UploadFile = File(...)) -> str:
     # Save to markdown file in the specified directory
     output_path = os.path.join(output_dir, output_md)
     aest_time = datetime.now().strftime("%d %B %Y at %I:%M %p AEST")
-
+    text = "# Audio Transcription Results\n\n" + \
+    f"Generated on {aest_time}\n\n" + \
+    "## Summary\n" + \
+    f"{summary}\n\n" + \
+    "## Full Transcription\n" + \
+    f"{transcription}"
+    
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("# Audio Transcription Results\n\n")
-        f.write(f"Generated on {aest_time}\n\n")
-        f.write("## Summary\n")
-        f.write(f"{summary}\n\n")
-        f.write("## Full Transcription\n")
-        f.write(f"{transcription}\n")
+        f.write(text)
 
-    return output_path
+    return summary, transcription
 
 
 # Endpoint
 @app.post("/transcribe/")
 async def transcribe_audio(file: UploadFile = File(...)):
     """Transcribes audio and returns text + summary."""
-    output_path = transcribe(file)
+    summary, transcript = transcribe(file)
 
-    return {"status": "success", "file": output_path}
+    return {"status": "success", "summary": summary, "transcript": transcript }
 
 # Run server with: uvicorn main:app --host 0.0.0.0 --port 8000
